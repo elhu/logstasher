@@ -10,12 +10,13 @@ module ActionController
           :path       => (request.fullpath rescue "unknown")
       }
 
+      LogStasher.add_default_fields_to_payload(raw_payload, request)
+
       ActiveSupport::Notifications.instrument("start_processing.action_controller", raw_payload.dup)
 
       ActiveSupport::Notifications.instrument("process_action.action_controller", raw_payload) do |payload|
         result = super
 
-        LogStasher.add_default_fields_to_payload(raw_payload, request)
         if self.respond_to?(:logtasher_add_custom_fields_to_payload)
           before_keys = raw_payload.keys.clone
           logtasher_add_custom_fields_to_payload(raw_payload)
